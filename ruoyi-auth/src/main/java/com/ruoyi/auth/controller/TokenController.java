@@ -17,6 +17,11 @@ import com.ruoyi.common.security.service.TokenService;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.model.LoginUser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * token 控制
  * 
@@ -74,5 +79,43 @@ public class TokenController
         // 用户注册
         sysLoginService.register(registerBody.getUsername(), registerBody.getPassword());
         return R.ok();
+    }
+
+    @PostMapping("token")
+    public R<?> login(HttpServletRequest request, @RequestBody Map<String,Object> param)
+    {
+        try {
+            LoginUser loginUser = tokenService.getLoginUser(request);
+            if (StringUtils.isNull(loginUser)) {
+                throw new Exception("登陆已失效，请重新登陆！");
+            }
+            String accessToken = loginUser.getToken();
+            if (StringUtils.isNull(accessToken)) {
+                throw new Exception("Token已失效，请重新登陆！");
+            }
+            String system = (String) param.get("system");
+            if (StringUtils.isNull(system)) {
+                throw new Exception("系统不存在！");
+            }
+            List<Map<String, Object>> abilityList = new ArrayList<>();
+            Map<String, Object> ability = new HashMap<>();
+            ability.put("action", "manage");
+            ability.put("subject", "all");
+            abilityList.add(ability);
+
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("accessToken", accessToken);
+            resultMap.put("refreshToken", accessToken);
+            resultMap.put("fullName", loginUser.getSysUser().getNickName());
+            resultMap.put("username", loginUser.getSysUser().getNickName());
+            resultMap.put("email", loginUser.getSysUser().getEmail());
+            resultMap.put("avatar", loginUser.getSysUser().getAvatar());
+            resultMap.put("role", "admin");
+            resultMap.put("ability", abilityList);
+
+            return R.ok(resultMap);
+        } catch (Exception e) {
+            return R.fail(e.getMessage());
+        }
     }
 }

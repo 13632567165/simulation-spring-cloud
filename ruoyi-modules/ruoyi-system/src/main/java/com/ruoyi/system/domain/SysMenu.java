@@ -63,6 +63,13 @@ public class SysMenu extends BaseEntity
     /** 菜单图标 */
     private String icon;
 
+    private Integer platformId;
+
+    private String platformCode;
+
+    private String platformName;
+
+
     /** 子菜单 */
     private List<SysMenu> children = new ArrayList<SysMenu>();
 
@@ -232,7 +239,30 @@ public class SysMenu extends BaseEntity
     {
         this.children = children;
     }
-    
+
+    public Integer getPlatformId() {
+        return platformId;
+    }
+
+    public void setPlatformId(Integer platformId) {
+        this.platformId = platformId;
+    }
+
+    public String getPlatformCode() {
+        return platformCode;
+    }
+
+    public void setPlatformCode(String platformCode) {
+        this.platformCode = platformCode;
+    }
+
+    public String getPlatformName() {
+        return platformName;
+    }
+
+    public void setPlatformName(String platformName) {
+        this.platformName = platformName;
+    }
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -254,6 +284,9 @@ public class SysMenu extends BaseEntity
             .append("updateBy", getUpdateBy())
             .append("updateTime", getUpdateTime())
             .append("remark", getRemark())
+            .append("platformId", getPlatformId())
+            .append("platformCode", getPlatformCode())
+            .append("platformName", getPlatformName())
             .toString();
     }
 }

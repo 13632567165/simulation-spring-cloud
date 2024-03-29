@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysPlatformMapper">
+    
+    <resultMap type="SysPlatform" id="SysPlatformResult">
+        <result property="platformId"    column="platform_id"    />
+        <result property="platformCode"    column="platform_code"    />
+        <result property="platformName"    column="platform_name"    />
+        <result property="platformUrl"    column="platform_url"    />
+        <result property="enable"    column="enable"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectSysPlatformVo">
+        select platform_id, platform_code, platform_name, platform_url, enable, create_time, update_time from sys_platform
+    </sql>
+
+    <select id="selectSysPlatformList" parameterType="SysPlatform" resultMap="SysPlatformResult">
+        <include refid="selectSysPlatformVo"/>
+        <where>  
+            <if test="platformCode != null  and platformCode != ''"> and platform_code = #{platformCode}</if>
+            <if test="platformName != null  and platformName != ''"> and platform_name like concat('%', #{platformName}, '%')</if>
+            <if test="platformUrl != null  and platformUrl != ''"> and platform_url = #{platformUrl}</if>
+            <if test="enable != null "> and enable = #{enable}</if>
+        </where>
+    </select>
+    
+    <select id="selectSysPlatformByPlatformId" parameterType="Integer" resultMap="SysPlatformResult">
+        <include refid="selectSysPlatformVo"/>
+        where platform_id = #{platformId}
+    </select>
+        
+    <insert id="insertSysPlatform" parameterType="SysPlatform" useGeneratedKeys="true" keyProperty="platformId">
+        insert into sys_platform
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="platformCode != null">platform_code,</if>
+            <if test="platformName != null">platform_name,</if>
+            <if test="platformUrl != null">platform_url,</if>
+            <if test="enable != null">enable,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="platformCode != null">#{platformCode},</if>
+            <if test="platformName != null">#{platformName},</if>
+            <if test="platformUrl != null">#{platformUrl},</if>
+            <if test="enable != null">#{enable},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysPlatform" parameterType="SysPlatform">
+        update sys_platform
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="platformCode != null">platform_code = #{platformCode},</if>
+            <if test="platformName != null">platform_name = #{platformName},</if>
+            <if test="platformUrl != null">platform_url = #{platformUrl},</if>
+            <if test="enable != null">enable = #{enable},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where platform_id = #{platformId}
+    </update>
+
+    <delete id="deleteSysPlatformByPlatformId" parameterType="Integer">
+        delete from sys_platform where platform_id = #{platformId}
+    </delete>
+
+    <delete id="deleteSysPlatformByPlatformIds" parameterType="String">
+        delete from sys_platform where platform_id in 
+        <foreach item="platformId" collection="array" open="(" separator="," close=")">
+            #{platformId}
+        </foreach>
+    </delete>
+</mapper>
