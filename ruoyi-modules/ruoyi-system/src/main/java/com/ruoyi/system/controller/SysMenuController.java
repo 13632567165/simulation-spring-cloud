@@ -149,11 +149,11 @@ public class SysMenuController extends BaseController
      * 
      * @return 路由信息
      */
-    @GetMapping("getRouters")
-    public AjaxResult getRouters()
+    @GetMapping("getRouters/{platformId}")
+    public AjaxResult getRouters(@PathVariable("platformId") Long platformId)
     {
         Long userId = SecurityUtils.getUserId();
-        List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId);
+        List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId, platformId);
         return success(menuService.buildMenus(menus));
     }
 }

@@ -52,7 +52,7 @@ public interface ISysMenuService
      * @param userId 用户ID
      * @return 菜单列表
      */
-    public List<SysMenu> selectMenuTreeByUserId(Long userId);
+    public List<SysMenu> selectMenuTreeByUserId(Long userId, Long platformId);
 
     /**
      * 根据角色ID查询菜单树信息

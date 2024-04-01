@@ -128,16 +128,16 @@ public class SysMenuServiceImpl implements ISysMenuService
      * @return 菜单列表
      */
     @Override
-    public List<SysMenu> selectMenuTreeByUserId(Long userId)
+    public List<SysMenu> selectMenuTreeByUserId(Long userId, Long platformId)
     {
         List<SysMenu> menus = null;
         if (SecurityUtils.isAdmin(userId))
         {
-            menus = menuMapper.selectMenuTreeAll();
+            menus = menuMapper.selectMenuTreeAll(platformId);
         }
         else
         {
-            menus = menuMapper.selectMenuTreeByUserId(userId);
+            menus = menuMapper.selectMenuTreeByUserId(userId, platformId);
         }
         return getChildPerms(menus, 0);
     }

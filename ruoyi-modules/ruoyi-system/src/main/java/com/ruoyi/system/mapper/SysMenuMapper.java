@@ -55,7 +55,7 @@ public interface SysMenuMapper
      * 
      * @return 菜单列表
      */
-    public List<SysMenu> selectMenuTreeAll();
+    public List<SysMenu> selectMenuTreeAll(Long platformId);
 
     /**
      * 根据用户ID查询菜单
@@ -63,7 +63,7 @@ public interface SysMenuMapper
      * @param userId 用户ID
      * @return 菜单列表
      */
-    public List<SysMenu> selectMenuTreeByUserId(Long userId);
+    public List<SysMenu> selectMenuTreeByUserId(@Param("userId")Long userId, @Param("platformId") Long platformId);
 
     /**
      * 根据角色ID查询菜单树信息
