@@ -153,6 +153,10 @@ public class SysMenuController extends BaseController
     public AjaxResult getRouters(@PathVariable("platformId") Long platformId)
     {
         Long userId = SecurityUtils.getUserId();
+        if (platformId == 2 || platformId == 3 || platformId == 4) {
+            List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId, platformId);
+            return success(menuService.getSimulationRouters(userId, platformId));
+        }
         List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId, platformId);
         return success(menuService.buildMenus(menus));
     }

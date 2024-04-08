@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.ruoyi.system.domain.SysMenu;
 import com.ruoyi.system.domain.vo.RouterVo;
@@ -141,4 +142,13 @@ public interface ISysMenuService
      * @return 结果
      */
     public boolean checkMenuNameUnique(SysMenu menu);
+
+    /**
+     * 获取仿真平台(platform=2)的routers和menus
+     *
+     * @param userId 用户ID
+     * @param platformId 业务系统ID
+     * @return 结果
+     */
+    Map<String, Object> getSimulationRouters(Long userId, Long platformId);
 }

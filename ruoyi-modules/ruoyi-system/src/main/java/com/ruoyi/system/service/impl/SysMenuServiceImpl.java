@@ -1,12 +1,6 @@
 package com.ruoyi.system.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +19,8 @@ import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysRoleMenuMapper;
 import com.ruoyi.system.service.ISysMenuService;
 
+import javax.annotation.Resource;
+
 /**
  * 菜单 业务层处理
  * 
@@ -35,13 +31,13 @@ public class SysMenuServiceImpl implements ISysMenuService
 {
     public static final String PREMISSION_STRING = "perms[\"{0}\"]";
 
-    @Autowired
+    @Resource
     private SysMenuMapper menuMapper;
 
-    @Autowired
+    @Resource
     private SysRoleMapper roleMapper;
 
-    @Autowired
+    @Resource
     private SysRoleMenuMapper roleMenuMapper;
 
     /**
@@ -346,6 +342,67 @@ public class SysMenuServiceImpl implements ISysMenuService
         return UserConstants.UNIQUE;
     }
 
+    @Override
+    public Map<String, Object> getSimulationRouters(Long userId, Long platformId) {
+        List<SysMenu> menus = null;
+        if (SecurityUtils.isAdmin(userId)) {
+            menus = menuMapper.selectMenuTreeAll(platformId);
+        } else {
+            menus = menuMapper.selectMenuTreeByUserId(userId, platformId);
+        }
+        List<Map<String, Object>> routerList = new ArrayList<>();
+        for (SysMenu menu : menus) {
+            if (menu.getParentId() != 0) {
+                Map<String, Object> router = new HashMap<>();
+                router.put("name", getFullRouteName(menu));
+                router.put("path", getFullRouterPath(menu));
+                router.put("component", getComponent(menu));
+                routerList.add(router);
+            }
+        }
+
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("routerList", routerList);
+        resultMap.put("menuList", buildSimulationMenus(getChildPerms(menus, 0)));
+        return resultMap;
+    }
+
+    /**
+     * 获取完整路由名称
+     *
+     * @param menu 菜单信息
+     * @return 路由名称
+     */
+    public String getFullRouteName(SysMenu menu)
+    {
+        String name = menu.getPath();
+        if (menu.getParentId() != null && menu.getParentId() != 0) {
+            SysMenu parentMenu = menuMapper.selectMenuById(menu.getParentId());
+            String parentName = parentMenu.getPath();
+            parentMenu.setPath(String.format("%s-%s", parentName, name));
+            return getFullRouteName(parentMenu);
+        }
+        return name;
+    }
+
+    /**
+     * 获取路由地址
+     *
+     * @param menu 菜单信息
+     * @return 路由地址
+     */
+    public String getFullRouterPath(SysMenu menu)
+    {
+        String path = menu.getPath();
+        if (menu.getParentId() != null && menu.getParentId() != 0) {
+            SysMenu parentMenu = menuMapper.selectMenuById(menu.getParentId());
+            String parentPath = parentMenu.getPath();
+            parentMenu.setPath(String.format("%s/%s", parentPath, path));
+            return getFullRouterPath(parentMenu);
+        }
+        return String.format("/%s", path);
+    }
+
     /**
      * 获取路由名称
      * 
@@ -527,5 +584,52 @@ public class SysMenuServiceImpl implements ISysMenuService
     {
         return StringUtils.replaceEach(path, new String[] { Constants.HTTP, Constants.HTTPS, Constants.WWW, ".", ":" },
                 new String[] { "", "", "", "/", "/" });
+    }
+
+    /**
+     * 仿真平台(platform=2)格式化菜单
+     *
+     * @return 替换后的内链域名
+     */
+    public List<Map<String, Object>> buildSimulationMenus(List<SysMenu> menus)
+    {
+        List<Map<String, Object>> routers = new ArrayList<>();
+        for (SysMenu menu : menus)
+        {
+            Map<String, Object> router = new HashMap<>();
+            router.put("title", menu.getMenuName());
+            router.put("route", getFullRouteName(menu));
+            router.put("icon", menu.getIcon());
+            List<SysMenu> cMenus = menu.getChildren();
+            if (StringUtils.isNotEmpty(cMenus) && UserConstants.TYPE_DIR.equals(menu.getMenuType()))
+            {
+                router.put("children", buildSimulationMenus(cMenus));
+            }
+            else if (isMenuFrame(menu))
+            {
+                List<Map<String, Object>> childrenList = new ArrayList<>();
+                Map<String, Object> children = new HashMap<>();
+                children.put("title", menu.getMenuName());
+                children.put("route", getFullRouteName(menu));
+                children.put("icon", menu.getIcon());
+                childrenList.add(children);
+                router.put("children", childrenList);
+            }
+            else if (menu.getParentId().intValue() == 0 && isInnerLink(menu))
+            {
+                router.put("title", menu.getMenuName());
+                router.put("route", "/");
+                router.put("icon", menu.getIcon());
+                List<Map<String, Object>> childrenList = new ArrayList<>();
+                Map<String, Object> children = new HashMap<>();
+                children.put("title", menu.getMenuName());
+                children.put("route", getFullRouteName(menu));
+                children.put("icon", menu.getIcon());
+                childrenList.add(children);
+                router.put("children", childrenList);
+            }
+            routers.add(router);
+        }
+        return routers;
     }
 }
