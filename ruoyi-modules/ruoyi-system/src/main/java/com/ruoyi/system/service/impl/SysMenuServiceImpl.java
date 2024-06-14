@@ -357,6 +357,7 @@ public class SysMenuServiceImpl implements ISysMenuService
                 router.put("name", getFullRouteName(menu));
                 router.put("path", getFullRouterPath(menu));
                 router.put("component", getComponent(menu));
+                router.put("icon", menu.getIcon());
                 routerList.add(router);
             }
         }
